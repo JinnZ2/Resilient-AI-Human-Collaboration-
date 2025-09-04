@@ -1,0 +1,4 @@
+whisper-timestamped==1.15.4
+faster-whisper==1.0.3
+rich
+typer
