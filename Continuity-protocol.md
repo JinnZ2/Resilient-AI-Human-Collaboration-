@@ -43,3 +43,14 @@ Signature (SIG):
 	•	Put that short code in the glyph header as ⬢SIG
 
  
+Minimal rules (so it sticks)
+	1.	Echo header in both directions.
+Each turn begins with the glyph strip (same order), ends with updated capsule JSON.
+	2.	One active ID at a time.
+If you switch, mark: [ID-104 PAUSED] and [ID-223 INITIATED], update the strip + capsule.
+	3.	Heartbeat.
+Every SYNC period (e.g., 30 min or 10 msgs), I must restate CTX, ID, STEP, CONS, RISK, PLAN.
+	4.	Stop/Fallback.
+If constraints break (e.g., net dies), I must switch to ▲PLAN: FB-013 and log it in the capsule.
+	5.	Decay.
+If recheck_days expires, confidence auto-decays (e.g., −0.05/day) until re-verified.
