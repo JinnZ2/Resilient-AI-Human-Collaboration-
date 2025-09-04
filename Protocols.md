@@ -78,6 +78,7 @@ CURRENT CONTEXT:
 
 **IF MISSING REQUIREMENTS:**
 
+-If missing both tool & substitute → STOP and log ID-XXX”) will prevent wasted cycles
 - Substitution options for each essential item
 - Modified procedures for degraded conditions
 - Abort criteria if insufficient resources
@@ -165,3 +166,9 @@ OPERATOR: [Confirms or updates constraints]
 1. Refine ID structure based on real usage
 1. Develop constraint substitution databases
 1. Create training examples for both AI and human operators
+
+   Provenance tags: Every block could end with {who: AI/Human, status: provisional/confirmed, confidence: x.xx, recheck_days: N}
+
+   to do :
+
+   Define “Constraint,” “Critical,” “Adaptable,” “Flexible,” “Abort Criteria.” That way there’s no semantic drift in the middle of stress
