@@ -73,3 +73,11 @@ Verify:
 - [ ] Transcript present   [ ] 3 key steps extracted   [ ] Timestamp + provenance
 
 
+Protocol: Status Declaration
+Intent: keep both nodes synced on context
+Checklist:
+- [ ] Active ID confirmed
+- [ ] Last completed step named
+- [ ] Constraints up to date
+Stop rule: if missing info, do not continue
+
