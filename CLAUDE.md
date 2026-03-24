@@ -12,6 +12,7 @@ environments.
 scripts/          Shell utilities (download, setup)
 apps/             Application code (Python)
   voice_assist/   Whisper-based transcription CLI
+  protocol/       Collaboration protocol CLI (decision IDs, checklists, state capsules)
 docs/             Protocol docs and checklists
 env.example       Template for .env (HF_TOKEN, YTDLP_OPTS)
 ```
@@ -41,6 +42,13 @@ bash scripts/yt_bulk.sh <dest> <url>
 
 # Transcribe a local file
 python -m apps.voice_assist.cli transcribe <file>
+
+# Protocol tools — start a session, manage decision IDs, run checklists
+python -m apps.protocol.cli init --ctx "Build swarm"
+python -m apps.protocol.cli id new "Power supply bypass"
+python -m apps.protocol.cli checklist run bad-internet
+python -m apps.protocol.cli status
+python -m apps.protocol.cli sync
 ```
 
 ## Code Quality

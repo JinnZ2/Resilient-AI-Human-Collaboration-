@@ -1,0 +1,23 @@
+name: bad-internet
+intent: Get a model locally without wasting time on retries.
+
+preflight:
+  - text: "HF token in .env"
+  - text: "aria2c or curl present"
+  - text: "Disk > 10 GB free"
+
+run:
+  - text: "List exact filenames via API (no guessing)"
+  - text: "Resume download with aria2c or curl (--continue)"
+  - text: "Store under data/models/ (gitignored)"
+
+verify:
+  - text: "File size matches (within 1%)"
+  - text: "SHA256 check (optional)"
+    required: false
+  - text: "Import via Modelfile -> ollama create worked"
+
+fallback:
+  - "If gated/401: accept license in browser, retry"
+  - "If link stalls: switch to phone hotspot or USB-sneakernet"
+  - "If still failing: choose smaller Q4 model"

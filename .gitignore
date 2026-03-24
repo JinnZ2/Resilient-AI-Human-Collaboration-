@@ -16,6 +16,9 @@ data/cache/
 *.wav
 *.mp3
 
+# Protocol state (per-session, local)
+.protocol-state.json
+
 # OS
 .DS_Store
 Thumbs.db

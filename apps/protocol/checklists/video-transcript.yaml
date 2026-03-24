@@ -1,0 +1,22 @@
+name: video-transcript
+intent: Make a dyslexia-friendly study packet from a video.
+
+preflight:
+  - text: "yt-dlp works offline or cached"
+  - text: "Whisper model downloaded"
+  - text: "Output folders exist (data/videos/)"
+
+run:
+  - text: "Download video with yt_bulk.sh or yt-dlp"
+  - text: "Transcribe with voice_assist cli.py"
+  - text: "Review transcript for accuracy"
+
+verify:
+  - text: "Transcript file present"
+  - text: "3 key steps or topics extracted"
+  - text: "Timestamp + provenance added"
+
+fallback:
+  - "If download fails: switch to single video URL or ytsearch"
+  - "If CPU too slow: queue to helper node"
+  - "If transcript garbled: try larger Whisper model"
