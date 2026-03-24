@@ -1,0 +1,20 @@
+name: status-declaration
+intent: Keep both nodes synced on context before proceeding.
+
+preflight:
+  - text: "Active decision point ID confirmed"
+  - text: "Last completed step named"
+  - text: "Constraints up to date"
+
+run:
+  - text: "Declare current context and active method"
+  - text: "List known constraints (tools, materials, connection)"
+  - text: "State modification level (critical/adaptable/flexible)"
+
+verify:
+  - text: "Both parties agree on current state"
+  - text: "No contradictions with previous decisions"
+
+fallback:
+  - "If missing info: do not continue until synced"
+  - "Stop rule: if >30 min no progress, log and switch to fallback"
