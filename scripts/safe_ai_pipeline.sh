@@ -143,7 +143,7 @@ verify_model() {
         # Check for matching .sha256 sidecar file
         if [ -f "${model_file}.sha256" ]; then
             local expected
-            expected="$(cat "${model_file}.sha256" | cut -d' ' -f1)"
+            expected="$(cut -d' ' -f1 < "${model_file}.sha256")"
             if [ "${sha}" = "${expected}" ]; then
                 pass "  SHA256 matches sidecar checksum"
                 log "SHA256 match for ${basename}"
