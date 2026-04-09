@@ -1,0 +1,24 @@
+name: context-recovery
+intent: Recover session context after an interruption or communication break.
+
+preflight:
+  - text: ".protocol-state.json exists"
+  - text: "Last sync timestamp is readable"
+  - text: "Operator can recall approximate last activity"
+
+run:
+  - text: "Load state: `protocol status`"
+  - text: "Review active and paused decision points: `protocol id list`"
+  - text: "Check time since last sync — apply confidence decay if needed"
+  - text: "Update constraints to current reality"
+  - text: "Resume the most relevant paused decision point"
+
+verify:
+  - text: "Active ID and step match operator memory"
+  - text: "Confidence level reflects current certainty"
+  - text: "Fresh sync capsule generated: `protocol sync`"
+
+fallback:
+  - "If state file missing: start fresh with `protocol init`, reference old exports"
+  - "If operator memory unclear: set confidence to 0.3, tag provisional"
+  - "If >24h since last sync: review all decision points before resuming"

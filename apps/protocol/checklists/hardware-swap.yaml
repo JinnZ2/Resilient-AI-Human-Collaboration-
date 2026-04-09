@@ -1,0 +1,27 @@
+name: hardware-swap
+intent: Safely swap or upgrade hardware mid-session without losing state.
+
+preflight:
+  - text: "Current session state exported (`protocol export`)"
+  - text: "All active decision points paused"
+  - text: "Backup of .protocol-state.json created"
+  - text: "Power supply stable or UPS available"
+
+run:
+  - text: "Power down target system safely"
+  - text: "Perform physical hardware change"
+  - text: "Power up and verify POST / boot"
+  - text: "Restore .protocol-state.json from backup"
+  - text: "Run `protocol status` to verify state intact"
+
+verify:
+  - text: "System boots to OS without errors"
+  - text: "Protocol state matches pre-swap export"
+  - text: "Network connectivity restored (if applicable)"
+    required: false
+  - text: "Resume paused decision points"
+
+fallback:
+  - "If system won't POST: revert hardware change, restore original"
+  - "If state file corrupted: re-init from last exported markdown/JSON"
+  - "If new hardware incompatible: document in risks and switch to fallback plan"
