@@ -1,0 +1,24 @@
+name: new-session
+intent: Bootstrap a fresh collaboration session with all roles aligned.
+
+preflight:
+  - text: "Goal / context agreed between all parties"
+  - text: "Roles assigned (operator, helper, planner)"
+  - text: "Communication channel confirmed (online/offline)"
+  - text: "Fallback plan identified"
+
+run:
+  - text: "Run `protocol init --ctx '<goal>'`"
+  - text: "Set constraints: `protocol constraint net <status>`"
+  - text: "Create first decision point: `protocol id new '<description>'`"
+  - text: "Record any known risks: `protocol risk add '<risk>'`"
+
+verify:
+  - text: "Status output looks correct: `protocol status`"
+  - text: "All parties confirm shared understanding"
+  - text: "Sync capsule generated: `protocol sync`"
+
+fallback:
+  - "If parties disagree on context: pause and clarify before continuing"
+  - "If tools missing: run `bash scripts/prep_cpu.sh` first"
+  - "If offline: note in constraints and proceed with local-only workflow"

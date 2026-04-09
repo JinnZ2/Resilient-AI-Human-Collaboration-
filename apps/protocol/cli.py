@@ -195,6 +195,120 @@ def id_step(dp_id: str, step_num: int) -> None:
     print(f"[{dp.id}: step {step_num} completed]")
 
 
+# ── risk & confidence commands ───────────────────────────────────
+
+@app.command()
+def risk(
+    action: str = typer.Argument(..., help="add, remove, or list"),
+    value: str = typer.Argument("", help="Risk description (for add/remove)"),
+) -> None:
+    """Manage risks: add <text>, remove <text>, or list."""
+    state = require_state()
+    action = action.lower()
+    if action == "add":
+        if not value:
+            print("Usage: protocol risk add <description>", file=__import__("sys").stderr)
+            raise typer.Exit(1)
+        state.risks.append(value)
+        save_state(state)
+        print(f"[+] Risk added: {value}")
+    elif action == "remove":
+        try:
+            state.risks.remove(value)
+            save_state(state)
+            print(f"[-] Risk removed: {value}")
+        except ValueError:
+            print(f"Risk not found: {value}")
+            raise typer.Exit(1)
+    elif action == "list":
+        if not state.risks:
+            print("No risks recorded.")
+        else:
+            for r in state.risks:
+                print(f"  - {r}")
+    else:
+        print(f"Unknown action: {action}. Use add, remove, or list.")
+        raise typer.Exit(1)
+
+
+@app.command()
+def confidence(
+    value: float = typer.Argument(..., help="Confidence value 0.0-1.0"),
+    tag: str = typer.Option("", help="Set tag: provisional or confirmed"),
+) -> None:
+    """Set the session confidence level (0.0 to 1.0)."""
+    state = require_state()
+    if not 0.0 <= value <= 1.0:
+        print("Confidence must be between 0.0 and 1.0.", file=__import__("sys").stderr)
+        raise typer.Exit(1)
+    state.confidence = value
+    if tag:
+        if tag not in ("provisional", "confirmed"):
+            print("Tag must be 'provisional' or 'confirmed'.", file=__import__("sys").stderr)
+            raise typer.Exit(1)
+        state.tag = tag
+    save_state(state)
+    print(f"Confidence: {state.confidence:.2f} ({state.tag})")
+
+
+@app.command()
+def export(
+    fmt: str = typer.Option("markdown", help="Export format: markdown or json"),
+) -> None:
+    """Export the current session state as a readable report."""
+    state = require_state()
+    if fmt == "json":
+        print(state.model_dump_json(indent=2))
+    elif fmt == "markdown":
+        _export_markdown(state)
+    else:
+        print(f"Unknown format: {fmt}. Use markdown or json.")
+        raise typer.Exit(1)
+
+
+def _export_markdown(state: SessionState) -> None:
+    """Print a markdown summary of the session."""
+    lines = [
+        f"# Session Report: {state.sid}",
+        "",
+        f"**Context:** {state.ctx or '(none)'}",
+        f"**Confidence:** {state.confidence:.2f} ({state.tag})",
+        f"**Sequence:** {state.seq}",
+        f"**Created:** {state.created_at.isoformat()}",
+        f"**Last Sync:** {state.last_sync_at.isoformat()}",
+        "",
+        "## Constraints",
+        "",
+        f"- **Network:** {state.constraints.net}",
+        f"- **Time:** {state.constraints.time}",
+    ]
+    if state.constraints.tools:
+        lines.append(f"- **Tools:** {', '.join(state.constraints.tools)}")
+    for k, v in state.constraints.extras.items():
+        lines.append(f"- **{k}:** {v}")
+
+    if state.risks:
+        lines += ["", "## Risks", ""]
+        for r in state.risks:
+            lines.append(f"- {r}")
+
+    if state.decision_points:
+        lines += ["", "## Decision Points", ""]
+        for dp in state.decision_points.values():
+            marker = {"active": "ACTIVE", "paused": "PAUSED", "completed": "DONE"}[dp.status]
+            lines.append(f"- **{dp.id}** [{marker}] {dp.description} (tier: {dp.tier})")
+            if dp.last_completed_step is not None:
+                lines.append(f"  - Last completed step: {dp.last_completed_step}")
+
+    if state.checklist_runs:
+        lines += ["", "## Checklist Runs", ""]
+        for run in state.checklist_runs:
+            lines.append(f"- **{run.checklist_name}**: {run.status}")
+
+    lines += ["", "---", f"*Exported at sequence {state.seq}*", ""]
+    print("\n".join(lines))
+
+
 # ── checklist commands ───────────────────────────────────────────
 
 @cl_app.command("list")

@@ -3,11 +3,14 @@ __pycache__/
 *.pyc
 .venv/
 .env
+*.egg-info/
+.pytest_cache/
 
 # Data
 data/models/
 data/videos/
 data/cache/
+data/pipeline_logs/
 *.tmp
 
 # Large binaries
