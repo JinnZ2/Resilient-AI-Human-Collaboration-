@@ -8,6 +8,7 @@
 |------|-------------|
 | `apps/protocol/` | Collaboration protocol CLI — session state, decision IDs, checklists, risk tracking |
 | `apps/voice_assist/` | Transcribe videos to text, summarize, and format for accessibility |
+| `scripts/safe_ai_pipeline.sh` | Safe AI pipeline — verified transcription with provenance tracking |
 | `scripts/hf_get.sh` | Resilient Hugging Face model downloader (resume + token) |
 | `scripts/yt_bulk.sh` | Resilient YouTube bulk downloader |
 | `scripts/prep_cpu.sh` | One-shot Ubuntu dependency installer |
@@ -79,6 +80,7 @@ python -m apps.protocol.cli checklist run bad-internet
 | `new-session` | Bootstrap a fresh collaboration session |
 | `hardware-swap` | Swap hardware mid-session without losing state |
 | `context-recovery` | Recover after an interruption or communication break |
+| `safe-ai-pipeline` | Verified, auditable AI inference with provenance |
 
 ## Voice Assist
 
@@ -97,6 +99,30 @@ python -m apps.voice_assist.cli format-text transcript.txt --width 60
 # Extract key sentences from a transcript (offline, no ML needed)
 python -m apps.voice_assist.cli summarize transcript.txt --sentences 5
 ```
+
+## Safe AI Pipeline
+
+End-to-end verified inference: preflight checks, model integrity, transcription, fidelity validation, and provenance logging. Designed for low-trust / offline environments.
+
+```bash
+# Check environment is ready
+bash scripts/safe_ai_pipeline.sh --preflight
+
+# Verify downloaded model integrity (checksums)
+bash scripts/safe_ai_pipeline.sh --verify-model
+
+# Full pipeline: preflight → model check → transcribe → fidelity → provenance
+bash scripts/safe_ai_pipeline.sh recording.mp4
+
+# Use the matching protocol checklist
+python -m apps.protocol.cli checklist run safe-ai-pipeline
+```
+
+The pipeline produces:
+- Transcription in `data/videos/transcripts/`
+- Dyslexia-friendly formatted version (`.formatted.txt`)
+- Extractive summary (`.summary.txt`)
+- Provenance JSON with SHA256 hashes in `data/pipeline_logs/`
 
 ## Scripts
 

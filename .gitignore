@@ -10,6 +10,7 @@ __pycache__/
 data/models/
 data/videos/
 data/cache/
+data/pipeline_logs/
 *.tmp
 
 # Large binaries

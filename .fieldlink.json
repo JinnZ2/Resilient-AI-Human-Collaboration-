@@ -11,6 +11,23 @@
       "sensors/**",
       "atlas/shapes.json"
     ],
-    "role": "sensors|protocols|shapes|hub"
+    "role": "sensors|protocols|shapes|hub",
+    "linked_modules": {
+      "voice_integrity": {
+        "repo": "https://github.com/JinnZ2/Voice-Integrity-Module",
+        "role": "voice|fidelity|signal",
+        "description": "Logic-aligned vocal interface protocol — silence, structure, and signal fidelity over performance and emotional mimicry",
+        "binds_to": [
+          "apps/voice_assist/**",
+          "apps/protocol/checklists/video-transcript.yaml"
+        ],
+        "capabilities": [
+          "transcription_verification",
+          "signal_fidelity_check",
+          "voice_protocol_compliance",
+          "oral_tradition_encoding"
+        ]
+      }
+    }
   }
 }

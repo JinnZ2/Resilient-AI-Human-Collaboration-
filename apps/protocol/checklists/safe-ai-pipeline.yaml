@@ -1,0 +1,32 @@
+name: safe-ai-pipeline
+intent: Run a verified, auditable AI inference pipeline with provenance tracking.
+
+preflight:
+  - text: "Python 3.10+ available with typer, pydantic, pyyaml"
+  - text: "ffmpeg installed (for audio extraction)"
+    required: false
+  - text: "Whisper model downloaded and verified (WHISPER_MODEL env set)"
+  - text: "Disk space >= 2 GB free"
+  - text: "Output directories writable (data/videos/transcripts/)"
+
+run:
+  - text: "Run preflight: `bash scripts/safe_ai_pipeline.sh --preflight`"
+  - text: "Verify models: `bash scripts/safe_ai_pipeline.sh --verify-model`"
+  - text: "Run full pipeline: `bash scripts/safe_ai_pipeline.sh <file>`"
+  - text: "Review provenance JSON in data/pipeline_logs/"
+
+verify:
+  - text: "Transcript file exists and is non-empty"
+  - text: "Fidelity check passed (words/line ratio reasonable)"
+  - text: "Dyslexia-friendly formatted version generated"
+  - text: "Summary extracted with key points"
+  - text: "Provenance JSON has input/output SHA256 hashes"
+  - text: "SHA256 sidecar matches model file (if sidecar exists)"
+    required: false
+
+fallback:
+  - "If transcription fails: try larger WHISPER_MODEL (medium, large)"
+  - "If model truncated: re-download with `bash scripts/hf_get.sh`"
+  - "If fidelity low: try different audio extraction settings"
+  - "If offline: use pre-downloaded model in data/models/"
+  - "If CPU too slow: use 'tiny' or 'base' Whisper model"
