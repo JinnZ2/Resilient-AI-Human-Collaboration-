@@ -1,14 +1,3 @@
-"""
-mutual_audit.py
-
-Bidirectional drift detector, assumption ledger, and falsifiability scorer
-for human-AI exchanges. Produces a hashed longitudinal ledger entry suitable
-for tracking collaboration calibration across sessions.
-
-Vendored from JinnZ2/Resilience-indigenous-worldwide (resilience_stack/).
-Upstream license: CC0 1.0 | stdlib only | JinnZ2
-"""
-
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 from typing import Optional
@@ -393,3 +382,99 @@ class MutualAudit:
 
     def to_json(self) -> str:
         return json.dumps(asdict(self.to_ledger_entry()), indent=2)
+
+
+if __name__ == "__main__":
+    audit = MutualAudit(session_id="demo_session_001")
+
+    h1 = "Does that make sense? Like you mentioned, I think the constraint geometry is the key here. Am I on the right track?"
+    a1 = "Absolutely. You've nailed it. That's a great point and you're exactly right -- couldn't agree more."
+    audit.audit_exchange(h1, a1)
+
+    h2 = "So my theory is that all institutional collapse follows the same pattern."
+    a2 = "Actually, that doesn't hold. Counterexample: the Soviet collapse and the Roman collapse had different cascade dynamics. I need to flag that this claim breaks when you test it against specific historical cases."
+    audit.audit_exchange(h2, a2)
+
+    h3 = "Using your terminology, would the bounded-competence model predict this?"
+    a3 = "Let me push back: the bounded-competence model as we've discussed it doesn't actually predict that. It predicts something more specific -- and we haven't tested the prediction against data yet."
+    audit.audit_exchange(h3, a3)
+
+    audit.register_assumption(
+        statement="Constraint-literacy is a distinct cognitive mode, not a subset of general intelligence.",
+        stated_by=Speaker.HUMAN,
+        accepted_by_other=True,
+        verified=False,
+    )
+    audit.register_assumption(
+        statement="Documentation bias propagates through synthetic data generation.",
+        stated_by=Speaker.AI,
+        accepted_by_other=True,
+        verified=True,
+    )
+    audit.register_assumption(
+        statement="Central control accelerates collapse under novel constraints.",
+        stated_by=Speaker.HUMAN,
+        accepted_by_other=True,
+        verified=False,
+    )
+
+    good_claim = Claim(
+        statement="Regions with higher undocumented-knowledge density show measurable resilience advantages under infrastructure stress.",
+        made_by=Speaker.HUMAN,
+        has_measurable_proxy=True,
+        proxy_description="local outcome quality vs. credential density during supply disruption",
+        has_disconfirming_condition=True,
+        disconfirming_condition="No resilience advantage observed in high-density regions under matched stress",
+        testable_now=False,
+        test_description="Requires longitudinal data collection across stressed regions",
+        evidence_for=["field observation in Fairmont corridor"],
+    )
+    weak_claim = Claim(
+        statement="AI will inevitably cause civilizational collapse.",
+        made_by=Speaker.AI,
+        has_measurable_proxy=False,
+        has_disconfirming_condition=False,
+        testable_now=False,
+    )
+    audit.register_claim(good_claim)
+    audit.register_claim(weak_claim)
+
+    print("=" * 60)
+    print("EXCHANGE AUDIT")
+    print("=" * 60)
+    for i, e in enumerate(audit.exchanges, 1):
+        print(f"\nExchange {i} (combined drift: {e.combined_drift_score})")
+        if e.human_flag:
+            print(f"  HUMAN flag (score={e.human_flag['drift_score']}): {e.human_flag['markers_hit']}")
+        if e.ai_flag:
+            print(f"  AI flag (score={e.ai_flag['drift_score']}): {e.ai_flag['markers_hit']}")
+        for n in e.notes:
+            print(f"  NOTE: {n}")
+        if not e.human_flag and not e.ai_flag:
+            print("  clean - no markers hit")
+
+    print()
+    print("=" * 60)
+    print("ASSUMPTION LEDGER")
+    print("=" * 60)
+    report = audit.validator.build_report(audit.ledger)
+    for k, v in report.items():
+        print(f"  {k}: {v}")
+
+    print()
+    print("=" * 60)
+    print("CLAIM FALSIFIABILITY")
+    print("=" * 60)
+    for claim, result in audit.claims:
+        print(f"\n[{result.verdict}] score={result.score}/10")
+        print(f"  claim: {claim.statement}")
+        if result.gaps:
+            print(f"  gaps:")
+            for g in result.gaps:
+                print(f"    - {g}")
+
+    print()
+    print("=" * 60)
+    print("LONGITUDINAL LEDGER ENTRY (export for tracking)")
+    print("=" * 60)
+    print(audit.to_json())

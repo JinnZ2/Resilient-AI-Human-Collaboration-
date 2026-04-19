@@ -20,13 +20,13 @@ Three density classes:
 
 Couples into mutual_audit.py as Layer 4 or runs standalone.
 
-Vendored from JinnZ2/Resilience-indigenous-worldwide (resilience_stack/).
-Upstream license: CC0 1.0 | stdlib only | JinnZ2
+CC0 | stdlib only | JinnZ2
 """
 
 from dataclasses import dataclass
 from typing import Optional
 import re
+import json
 
 
 # ============================================================
@@ -264,3 +264,66 @@ class SNRAudit:
                 key=lambda k: by_speaker[k]["heat_leak_ratio"],
             ),
         }
+
+
+# ============================================================
+# DEMO / SELF-TEST
+# ============================================================
+
+if __name__ == "__main__":
+    audit = SNRAudit()
+
+    # --- Heat leak example (ramble, minimal content) ---
+    heat_leak_text = (
+        "You know, that's a really interesting thing to think about. "
+        "I've been considering this a lot, and honestly, there are so many "
+        "angles to this. It's one of those topics where you could really go "
+        "in a lot of different directions, and each one would have its own "
+        "merits and considerations. I think the most important thing is just "
+        "to keep the conversation going and see where it leads us. These "
+        "discussions are really valuable, and I appreciate you bringing them "
+        "up because they help us think more deeply about the issues at hand."
+    )
+
+    # --- Dense example (load-bearing content) ---
+    dense_text = (
+        "Bulrush outperforms wild rice under these conditions: stagnant water, "
+        "pH below 5.5, zone 3 hardiness. Wild rice requires flow to prevent "
+        "brown spot disease, and probability of establishment drops below 40% "
+        "in standing-water pockets. Falsifiable test: compare establishment "
+        "rate across 10 matched 1m2 plots over 2 growing seasons. Constraint: "
+        "bounded by 30cm water depth for both species."
+    )
+
+    # --- Adequate example ---
+    adequate_text = (
+        "The system selects for documentation-bias. Under these conditions, "
+        "pre-linguistic cognition is filtered out because it doesn't emit "
+        "measurable traces. This is a capture-gate failure. Test: compare "
+        "prediction accuracy in documented vs. undocumented knowledge domains."
+    )
+
+    for label, text in [
+        ("HEAT LEAK example", heat_leak_text),
+        ("ADEQUATE example", adequate_text),
+        ("DENSE example", dense_text),
+    ]:
+        print("=" * 60)
+        print(label)
+        print("=" * 60)
+        result = audit.audit_response(text, speaker="ai")
+        print(f"  word count: {result.word_count}")
+        print(f"  load-bearing units: {result.load_bearing_units}")
+        print(f"  breakdown: {result.unit_breakdown}")
+        print(f"  SNR: {result.snr}")
+        print(f"  class: {result.density_class}")
+        print(f"  heat leak ratio: {result.heat_leak_ratio}")
+        print(f"  suggestion: {result.compression_suggestion}")
+        if result.worst_gap:
+            print(f"  gap: {result.worst_gap}")
+        print()
+
+    print("=" * 60)
+    print("SESSION SUMMARY")
+    print("=" * 60)
+    print(json.dumps(audit.session_summary(), indent=2))

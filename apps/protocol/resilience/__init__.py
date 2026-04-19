@@ -1,16 +1,25 @@
-"""Resilience audit modules.
+"""Resilience audit package.
 
-Vendored from JinnZ2/Resilience-indigenous-worldwide (resilience_stack/).
-Upstream license: CC0 1.0 Universal (public domain dedication).
+Layout
+------
+``vendor/``
+    Byte-identical upstream modules from
+    `JinnZ2/Resilience-indigenous-worldwide <https://github.com/JinnZ2/Resilience-indigenous-worldwide>`_
+    (``resilience_stack/``, CC0 1.0). Sync by overwriting files in place.
 
-Exposes two layers of the upstream stack that fit this project's
-human-AI collaboration protocol:
-
-- ``mutual_audit``: drift detector, assumption ledger, falsifiability scorer
-- ``signal_to_noise``: cognitive SNR / heat-leak measurement
+``audit_log.py``
+    Project-specific glue: appends ``AuditLedgerEntry`` dicts to
+    ``.protocol-audit.log.json`` and summarises cumulative drift for
+    ``protocol status`` / ``protocol export``.
 """
 
-from .mutual_audit import (
+from .audit_log import (
+    DEFAULT_LOG_PATH,
+    append_audit_entry,
+    audit_summary,
+    load_audit_log,
+)
+from .vendor.mutual_audit import (
     AgreeablenessDetector,
     AgreeablenessFlag,
     Assumption,
@@ -22,7 +31,7 @@ from .mutual_audit import (
     MutualAudit,
     Speaker,
 )
-from .signal_to_noise import (
+from .vendor.signal_to_noise import (
     LoadBearingDetector,
     SNRAnalyzer,
     SNRAudit,
@@ -37,6 +46,7 @@ __all__ = [
     "AssumptionLedger",
     "AuditLedgerEntry",
     "Claim",
+    "DEFAULT_LOG_PATH",
     "FalsifiabilityScore",
     "FalsifiabilityScorer",
     "LoadBearingDetector",
@@ -46,4 +56,7 @@ __all__ = [
     "SNRAuditEntry",
     "SNRResult",
     "Speaker",
+    "append_audit_entry",
+    "audit_summary",
+    "load_audit_log",
 ]

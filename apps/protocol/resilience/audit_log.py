@@ -13,7 +13,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Optional
 
-from .resilience import AuditLedgerEntry
+from .vendor.mutual_audit import AuditLedgerEntry
 
 DEFAULT_LOG_PATH = ".protocol-audit.log.json"
 

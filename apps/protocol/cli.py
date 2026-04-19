@@ -9,8 +9,8 @@ from datetime import datetime, timezone
 import typer
 
 from .audit_cli import audit_app
-from .audit_log import audit_summary
 from .capsule import generate_capsule, generate_glyph_strip
+from .resilience import audit_summary
 from .checklist import list_checklists, load_checklist, run_checklist_interactive
 from .models import Constraints, DecisionPoint, SessionState
 from .state import require_state, save_state, load_state

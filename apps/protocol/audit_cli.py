@@ -9,8 +9,7 @@ from pathlib import Path
 
 import typer
 
-from .audit_log import append_audit_entry
-from .resilience import MutualAudit, SNRAnalyzer, Speaker
+from .resilience import MutualAudit, SNRAnalyzer, Speaker, append_audit_entry
 from .state import load_state
 
 audit_app = typer.Typer(help="Audit human-AI exchanges for drift and density.")
