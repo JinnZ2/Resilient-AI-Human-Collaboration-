@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 
 import typer
 
+from .audit_cli import audit_app
 from .capsule import generate_capsule, generate_glyph_strip
 from .checklist import list_checklists, load_checklist, run_checklist_interactive
 from .models import Constraints, DecisionPoint, SessionState
@@ -18,6 +19,7 @@ id_app = typer.Typer(help="Manage decision point IDs.")
 cl_app = typer.Typer(help="Run and manage checklists.")
 app.add_typer(id_app, name="id")
 app.add_typer(cl_app, name="checklist")
+app.add_typer(audit_app, name="audit")
 
 
 # ── session commands ─────────────────────────────────────────────

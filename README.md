@@ -68,6 +68,11 @@ python -m apps.protocol.cli export --fmt json    # JSON
 # Run checklists
 python -m apps.protocol.cli checklist list
 python -m apps.protocol.cli checklist run bad-internet
+
+# Audit exchanges for drift and density (see "Audit" below)
+python -m apps.protocol.cli audit snr response.txt
+python -m apps.protocol.cli audit exchange human.txt ai.txt
+python -m apps.protocol.cli audit claim "X correlates with Y" --proxy "metric Z"
 ```
 
 ### Available Checklists
@@ -81,6 +86,33 @@ python -m apps.protocol.cli checklist run bad-internet
 | `hardware-swap` | Swap hardware mid-session without losing state |
 | `context-recovery` | Recover after an interruption or communication break |
 | `safe-ai-pipeline` | Verified, auditable AI inference with provenance |
+
+## Audit
+
+Keep human-AI exchanges calibrated to truth rather than to mutual agreement.
+Three stateless checks, stdlib-only:
+
+```bash
+# Signal-to-noise: flag low-density "heat leak" responses
+python -m apps.protocol.cli audit snr response.txt
+python -m apps.protocol.cli audit snr - < response.txt   # stdin
+
+# Exchange audit: drift markers (smoothing, validation-seeking) + SNR
+python -m apps.protocol.cli audit exchange human.txt ai.txt --session-id s1
+
+# Falsifiability score (0-10) for a claim
+python -m apps.protocol.cli audit claim "X correlates with Y under stress" \
+  --proxy "outcome quality vs. credential density" \
+  --disconfirm "no correlation in matched cohort" \
+  --testable --evidence-for "pilot study"
+```
+
+Output is JSON by default (`--fmt text` for a flatter form). Ledger entries
+include a short SHA-256 export hash for longitudinal tracking.
+
+The `apps/protocol/resilience/` modules are vendored from
+[JinnZ2/Resilience-indigenous-worldwide](https://github.com/JinnZ2/Resilience-indigenous-worldwide)
+(`resilience_stack/`, CC0 1.0).
 
 ## Voice Assist
 

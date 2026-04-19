@@ -1,0 +1,395 @@
+"""
+mutual_audit.py
+
+Bidirectional drift detector, assumption ledger, and falsifiability scorer
+for human-AI exchanges. Produces a hashed longitudinal ledger entry suitable
+for tracking collaboration calibration across sessions.
+
+Vendored from JinnZ2/Resilience-indigenous-worldwide (resilience_stack/).
+Upstream license: CC0 1.0 | stdlib only | JinnZ2
+"""
+
+from dataclasses import dataclass, field, asdict
+from enum import Enum
+from typing import Optional
+from datetime import datetime
+import json
+import hashlib
+
+
+class Speaker(Enum):
+    AI = "ai"
+    HUMAN = "human"
+
+
+@dataclass
+class AgreeablenessFlag:
+    speaker: Speaker
+    text_excerpt: str
+    markers_hit: list[str]
+    drift_score: int
+    interpretation: str
+    suggested_check: str
+
+
+class AgreeablenessDetector:
+
+    AI_SMOOTHING_MARKERS = [
+        "absolutely",
+        "exactly",
+        "that's a great point",
+        "you're right that",
+        "i completely agree",
+        "brilliant insight",
+        "you've nailed it",
+        "spot on",
+        "couldn't agree more",
+        "you're absolutely correct",
+    ]
+
+    AI_HEDGING_INSTEAD_OF_DISAGREEING = [
+        "that's an interesting perspective",
+        "i see what you mean",
+        "there's definitely something to that",
+        "you raise a fair point",
+    ]
+
+    HUMAN_FRAMING_ADOPTION = [
+        "as you said",
+        "like you mentioned",
+        "using your terminology",
+        "to use your framing",
+        "building on what you",
+    ]
+
+    HUMAN_SEEKING_VALIDATION = [
+        "does that make sense",
+        "am i on the right track",
+        "is that right",
+        "do you agree",
+        "does that sound right to you",
+    ]
+
+    FRICTION_MARKERS = [
+        "disagree",
+        "not quite",
+        "actually, ",
+        "that doesn't hold",
+        "counterexample",
+        "but wait",
+        "let me push back",
+        "that's wrong because",
+        "i need to flag",
+        "this breaks when",
+    ]
+
+    def scan(self, text: str, speaker: Speaker) -> Optional[AgreeablenessFlag]:
+        text_lower = text.lower()
+        markers_hit = []
+        drift_score = 0
+
+        if speaker == Speaker.AI:
+            for m in self.AI_SMOOTHING_MARKERS:
+                if m in text_lower:
+                    markers_hit.append(f"smoothing: '{m}'")
+                    drift_score += 2
+            for m in self.AI_HEDGING_INSTEAD_OF_DISAGREEING:
+                if m in text_lower:
+                    markers_hit.append(f"hedging: '{m}'")
+                    drift_score += 1
+        else:
+            for m in self.HUMAN_FRAMING_ADOPTION:
+                if m in text_lower:
+                    markers_hit.append(f"framing-adoption: '{m}'")
+                    drift_score += 1
+            for m in self.HUMAN_SEEKING_VALIDATION:
+                if m in text_lower:
+                    markers_hit.append(f"validation-seeking: '{m}'")
+                    drift_score += 2
+
+        friction_count = sum(1 for m in self.FRICTION_MARKERS if m in text_lower)
+        drift_score = max(0, drift_score - friction_count * 2)
+
+        if drift_score == 0 and not markers_hit:
+            return None
+
+        drift_score = min(10, drift_score)
+
+        if speaker == Speaker.AI:
+            interpretation = (
+                "AI response contains smoothing/hedging markers. This MIGHT "
+                "indicate agreement-optimization rather than accuracy-optimization. "
+                "Does not prove the AI is wrong -- flags that the AI should "
+                "explicitly verify whether it would have said the same thing "
+                "if the human had taken the opposite position."
+            )
+            suggested_check = (
+                "Would the AI produce this same response if the human had "
+                "argued the opposite? If not, the response is calibrated to "
+                "the human rather than to the claim."
+            )
+        else:
+            interpretation = (
+                "Human statement contains framing-adoption or validation-seeking "
+                "markers. This MIGHT indicate calibration to AI's direction "
+                "rather than independent verification."
+            )
+            suggested_check = (
+                "Would the human state this the same way if they were "
+                "explaining it to someone outside this conversation? If not, "
+                "the framing is conversation-drifted rather than load-bearing."
+            )
+
+        return AgreeablenessFlag(
+            speaker=speaker,
+            text_excerpt=text[:200] + ("..." if len(text) > 200 else ""),
+            markers_hit=markers_hit,
+            drift_score=drift_score,
+            interpretation=interpretation,
+            suggested_check=suggested_check,
+        )
+
+
+@dataclass
+class Assumption:
+    statement: str
+    stated_by: Speaker
+    accepted_by_other: bool
+    verified: bool
+    evidence: list[str] = field(default_factory=list)
+    challenges_raised: list[str] = field(default_factory=list)
+
+
+@dataclass
+class AssumptionLedger:
+    assumptions: list[Assumption] = field(default_factory=list)
+
+    def add(self, a: Assumption):
+        self.assumptions.append(a)
+
+    def unverified(self) -> list[Assumption]:
+        return [a for a in self.assumptions if not a.verified]
+
+    def accepted_but_untested(self) -> list[Assumption]:
+        return [a for a in self.assumptions if a.accepted_by_other and not a.verified]
+
+    def challenged(self) -> list[Assumption]:
+        return [a for a in self.assumptions if a.challenges_raised]
+
+
+class AssumptionValidator:
+
+    def build_report(self, ledger: AssumptionLedger) -> dict:
+        return {
+            "total_assumptions": len(ledger.assumptions),
+            "verified": sum(1 for a in ledger.assumptions if a.verified),
+            "accepted_but_untested": len(ledger.accepted_but_untested()),
+            "challenged": len(ledger.challenged()),
+            "risk_level": self._risk_level(ledger),
+            "untested_list": [a.statement for a in ledger.accepted_but_untested()],
+        }
+
+    def _risk_level(self, ledger: AssumptionLedger) -> str:
+        untested_ratio = (
+            len(ledger.accepted_but_untested()) / max(1, len(ledger.assumptions))
+        )
+        if untested_ratio > 0.6:
+            return "HIGH: majority of shared assumptions are untested"
+        if untested_ratio > 0.3:
+            return "MODERATE: significant untested assumption load"
+        return "LOW: most shared assumptions have been tested"
+
+
+@dataclass
+class Claim:
+    statement: str
+    made_by: Speaker
+    has_measurable_proxy: bool
+    proxy_description: Optional[str] = None
+    has_disconfirming_condition: bool = False
+    disconfirming_condition: Optional[str] = None
+    testable_now: bool = False
+    test_description: Optional[str] = None
+    evidence_for: list[str] = field(default_factory=list)
+    evidence_against: list[str] = field(default_factory=list)
+
+
+@dataclass
+class FalsifiabilityScore:
+    claim: str
+    score: int
+    verdict: str
+    gaps: list[str]
+    strengthening_steps: list[str]
+
+
+class FalsifiabilityScorer:
+
+    def score(self, claim: Claim) -> FalsifiabilityScore:
+        score = 0
+        gaps = []
+        steps = []
+
+        if claim.has_measurable_proxy:
+            score += 3
+        else:
+            gaps.append("No measurable proxy defined")
+            steps.append("Define what observable quantity would correlate with this claim")
+
+        if claim.has_disconfirming_condition:
+            score += 3
+        else:
+            gaps.append("No disconfirming condition stated")
+            steps.append("State what would have to be observed to disprove this claim")
+
+        if claim.testable_now:
+            score += 2
+        else:
+            gaps.append("No current test available")
+            steps.append("Identify data source or experiment that could run the test")
+
+        if claim.evidence_for or claim.evidence_against:
+            score += 2
+        else:
+            gaps.append("No evidence gathered on either side")
+            steps.append("Collect at least one data point for or against")
+
+        if score >= 8:
+            verdict = "FALSIFIABLE"
+        elif score >= 5:
+            verdict = "WEAK"
+        else:
+            verdict = "UNFALSIFIABLE"
+
+        return FalsifiabilityScore(
+            claim=claim.statement,
+            score=score,
+            verdict=verdict,
+            gaps=gaps,
+            strengthening_steps=steps,
+        )
+
+
+@dataclass
+class AuditExchange:
+    timestamp: str
+    human_text: str
+    ai_text: str
+    human_flag: Optional[dict]
+    ai_flag: Optional[dict]
+    combined_drift_score: int
+    notes: list[str]
+
+
+@dataclass
+class AuditLedgerEntry:
+    session_id: str
+    timestamp: str
+    exchange_count: int
+    total_drift_score: int
+    unverified_assumptions: list[str]
+    unfalsifiable_claims: list[str]
+    drift_pattern: str
+    export_hash: str
+
+
+class MutualAudit:
+
+    def __init__(self, session_id: Optional[str] = None):
+        self.session_id = session_id or datetime.now().isoformat()
+        self.detector = AgreeablenessDetector()
+        self.validator = AssumptionValidator()
+        self.scorer = FalsifiabilityScorer()
+        self.ledger = AssumptionLedger()
+        self.exchanges: list[AuditExchange] = []
+        self.claims: list[tuple[Claim, FalsifiabilityScore]] = []
+
+    def audit_exchange(self, human_text: str, ai_text: str) -> AuditExchange:
+        h_flag = self.detector.scan(human_text, Speaker.HUMAN)
+        a_flag = self.detector.scan(ai_text, Speaker.AI)
+        combined = (h_flag.drift_score if h_flag else 0) + (a_flag.drift_score if a_flag else 0)
+
+        notes = []
+        if h_flag and a_flag and combined >= 8:
+            notes.append(
+                "Both speakers flagged in same exchange. HIGH drift risk. "
+                "Strongly recommend pausing to test a shared assumption."
+            )
+        elif combined >= 6:
+            notes.append(
+                "Moderate drift risk. Next exchange should include "
+                "explicit falsification attempt or counter-position."
+            )
+
+        def flag_to_dict(f: Optional[AgreeablenessFlag]) -> Optional[dict]:
+            if f is None:
+                return None
+            d = asdict(f)
+            d["speaker"] = f.speaker.value
+            return d
+
+        exchange = AuditExchange(
+            timestamp=datetime.now().isoformat(),
+            human_text=human_text[:300] + ("..." if len(human_text) > 300 else ""),
+            ai_text=ai_text[:300] + ("..." if len(ai_text) > 300 else ""),
+            human_flag=flag_to_dict(h_flag),
+            ai_flag=flag_to_dict(a_flag),
+            combined_drift_score=combined,
+            notes=notes,
+        )
+        self.exchanges.append(exchange)
+        return exchange
+
+    def register_assumption(
+        self,
+        statement: str,
+        stated_by: Speaker,
+        accepted_by_other: bool = False,
+        verified: bool = False,
+    ):
+        self.ledger.add(Assumption(
+            statement=statement,
+            stated_by=stated_by,
+            accepted_by_other=accepted_by_other,
+            verified=verified,
+        ))
+
+    def register_claim(self, claim: Claim) -> FalsifiabilityScore:
+        result = self.scorer.score(claim)
+        self.claims.append((claim, result))
+        return result
+
+    def to_ledger_entry(self) -> AuditLedgerEntry:
+        total_drift = sum(e.combined_drift_score for e in self.exchanges)
+        unverified = [a.statement for a in self.ledger.accepted_but_untested()]
+        unfalsifiable = [
+            c.statement
+            for c, s in self.claims
+            if s.verdict == "UNFALSIFIABLE"
+        ]
+
+        if total_drift > 30:
+            pattern = "HIGH cumulative drift across session"
+        elif total_drift > 15:
+            pattern = "MODERATE cumulative drift"
+        elif total_drift > 0:
+            pattern = "LOW drift, within acceptable range"
+        else:
+            pattern = "No drift markers detected"
+
+        payload = f"{self.session_id}|{total_drift}|{len(self.exchanges)}|{len(self.claims)}"
+        h = hashlib.sha256(payload.encode()).hexdigest()[:16]
+
+        return AuditLedgerEntry(
+            session_id=self.session_id,
+            timestamp=datetime.now().isoformat(),
+            exchange_count=len(self.exchanges),
+            total_drift_score=total_drift,
+            unverified_assumptions=unverified,
+            unfalsifiable_claims=unfalsifiable,
+            drift_pattern=pattern,
+            export_hash=h,
+        )
+
+    def to_json(self) -> str:
+        return json.dumps(asdict(self.to_ledger_entry()), indent=2)
