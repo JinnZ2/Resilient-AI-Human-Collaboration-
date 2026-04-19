@@ -9,7 +9,9 @@ from pathlib import Path
 
 import typer
 
+from .audit_log import append_audit_entry
 from .resilience import MutualAudit, SNRAnalyzer, Speaker
+from .state import load_state
 
 audit_app = typer.Typer(help="Audit human-AI exchanges for drift and density.")
 
@@ -53,7 +55,12 @@ def _emit_text(payload: dict) -> None:
 def audit_exchange(
     human_file: str = typer.Argument(..., help="Path to human turn text (or '-' for stdin)."),
     ai_file: str = typer.Argument(..., help="Path to AI turn text (or '-' for stdin)."),
-    session_id: str = typer.Option("", help="Session id for the ledger entry."),
+    session_id: str = typer.Option(
+        "", help="Session id for the ledger entry. Defaults to active session."
+    ),
+    no_log: bool = typer.Option(
+        False, "--no-log", help="Don't append to .protocol-audit.log.json."
+    ),
     fmt: str = typer.Option("json", help="Output format: json or text."),
 ) -> None:
     """Scan one human/AI exchange for drift markers and SNR."""
@@ -64,6 +71,11 @@ def audit_exchange(
     human_text = _read_input(human_file)
     ai_text = _read_input(ai_file)
 
+    if not session_id:
+        state = load_state()
+        if state is not None:
+            session_id = state.sid
+
     audit = MutualAudit(session_id=session_id or None)
     exchange = audit.audit_exchange(human_text, ai_text)
 
@@ -72,6 +84,11 @@ def audit_exchange(
     ai_snr = snr.analyze(ai_text)
 
     ledger = audit.to_ledger_entry()
+
+    logged = False
+    if not no_log:
+        append_audit_entry(ledger)
+        logged = True
 
     payload = {
         "ledger": asdict(ledger),
@@ -85,6 +102,7 @@ def audit_exchange(
             "human": asdict(human_snr),
             "ai": asdict(ai_snr),
         },
+        "logged": logged,
     }
     _emit(payload, fmt)
 

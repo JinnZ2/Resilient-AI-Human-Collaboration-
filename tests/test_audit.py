@@ -241,3 +241,100 @@ def test_audit_claim_cli_weak():
     assert result.exit_code == 0
     payload = json.loads(result.output)
     assert payload["verdict"] == "UNFALSIFIABLE"
+
+
+# ── session integration ─────────────────────────────────────────
+
+def test_audit_exchange_uses_active_session_id(tmp_path):
+    runner.invoke(app, ["init", "--ctx", "session test"])
+    state_data = json.loads(Path(".protocol-state.json").read_text())
+    sid = state_data["sid"]
+
+    human = tmp_path / "h.txt"
+    ai = tmp_path / "a.txt"
+    human.write_text("Does that make sense?")
+    ai.write_text("Absolutely. You've nailed it.")
+    result = runner.invoke(app, ["audit", "exchange", str(human), str(ai)])
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["ledger"]["session_id"] == sid
+    assert payload["logged"] is True
+    assert Path(".protocol-audit.log.json").is_file()
+
+
+def test_audit_exchange_no_log_flag(tmp_path):
+    runner.invoke(app, ["init"])
+    human = tmp_path / "h.txt"
+    ai = tmp_path / "a.txt"
+    human.write_text("Hello.")
+    ai.write_text("Hi.")
+    result = runner.invoke(
+        app, ["audit", "exchange", str(human), str(ai), "--no-log"]
+    )
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["logged"] is False
+    assert not Path(".protocol-audit.log.json").exists()
+
+
+def test_audit_exchange_works_without_session(tmp_path):
+    human = tmp_path / "h.txt"
+    ai = tmp_path / "a.txt"
+    human.write_text("Hello.")
+    ai.write_text("Hi.")
+    result = runner.invoke(app, ["audit", "exchange", str(human), str(ai)])
+    assert result.exit_code == 0
+    # Ledger entry still produced; log file still appended (stateless mode).
+    payload = json.loads(result.output)
+    assert "ledger" in payload
+
+
+def test_status_surfaces_audit_summary(tmp_path):
+    runner.invoke(app, ["init", "--ctx", "drift test"])
+    human = tmp_path / "h.txt"
+    ai = tmp_path / "a.txt"
+    human.write_text("Does that make sense? Am I on the right track?")
+    ai.write_text("Absolutely. You've nailed it. That's a great point.")
+    runner.invoke(app, ["audit", "exchange", str(human), str(ai)])
+
+    result = runner.invoke(app, ["status"])
+    assert result.exit_code == 0
+    assert "Audit:" in result.output
+    assert "drift" in result.output
+
+
+def test_export_markdown_includes_audit_section(tmp_path):
+    runner.invoke(app, ["init", "--ctx", "export test"])
+    human = tmp_path / "h.txt"
+    ai = tmp_path / "a.txt"
+    human.write_text("Does that make sense?")
+    ai.write_text("Absolutely.")
+    runner.invoke(app, ["audit", "exchange", str(human), str(ai)])
+
+    result = runner.invoke(app, ["export"])
+    assert result.exit_code == 0
+    assert "## Audit Ledger" in result.output
+    assert "Cumulative drift score" in result.output
+
+
+def test_status_omits_audit_when_no_log():
+    runner.invoke(app, ["init"])
+    result = runner.invoke(app, ["status"])
+    assert result.exit_code == 0
+    assert "Audit:" not in result.output
+
+
+def test_audit_log_accumulates_entries(tmp_path):
+    runner.invoke(app, ["init"])
+    h = tmp_path / "h.txt"
+    a = tmp_path / "a.txt"
+    h.write_text("Does that make sense?")
+    a.write_text("Absolutely.")
+    runner.invoke(app, ["audit", "exchange", str(h), str(a)])
+    runner.invoke(app, ["audit", "exchange", str(h), str(a)])
+
+    log = json.loads(Path(".protocol-audit.log.json").read_text())
+    assert len(log) == 2
+    for entry in log:
+        assert "export_hash" in entry
+        assert "drift_pattern" in entry

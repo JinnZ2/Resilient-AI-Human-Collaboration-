@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 import typer
 
 from .audit_cli import audit_app
+from .audit_log import audit_summary
 from .capsule import generate_capsule, generate_glyph_strip
 from .checklist import list_checklists, load_checklist, run_checklist_interactive
 from .models import Constraints, DecisionPoint, SessionState
@@ -69,6 +70,12 @@ def status() -> None:
         print(f"  Paused IDs:")
         for dp in paused:
             print(f"    {dp.id}: {dp.description}")
+
+    summary = audit_summary()
+    if summary:
+        print(f"\n  Audit:      {summary['entries']} entries, "
+              f"drift {summary['total_drift_score']} ({summary['risk']})")
+        print(f"              last: {summary['last_pattern']}")
 
 
 @app.command()
@@ -306,6 +313,19 @@ def _export_markdown(state: SessionState) -> None:
         lines += ["", "## Checklist Runs", ""]
         for run in state.checklist_runs:
             lines.append(f"- **{run.checklist_name}**: {run.status}")
+
+    summary = audit_summary()
+    if summary:
+        lines += [
+            "",
+            "## Audit Ledger",
+            "",
+            f"- **Entries:** {summary['entries']}",
+            f"- **Total exchanges:** {summary['total_exchanges']}",
+            f"- **Cumulative drift score:** {summary['total_drift_score']} ({summary['risk']})",
+            f"- **Last pattern:** {summary['last_pattern']}",
+            f"- **Last hash:** `{summary['last_hash']}`",
+        ]
 
     lines += ["", "---", f"*Exported at sequence {state.seq}*", ""]
     print("\n".join(lines))
