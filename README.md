@@ -6,139 +6,58 @@ Built in the woods. Designed for clarity. Shared for everyone.
 
 ---
 
+## Origin & Expansion
+
+This toolkit started as a personal project: dyslexia-friendly transcription
+and formatting tools built for one person — my husband, who reads and
+processes differently. That original goal is met; the accessibility tools
+in `apps/voice_assist/` work, and he uses them.
+
+With the personal need served, this repo is now expanding outward — from a
+tool built for one household to a resource meant for anyone who needs
+resilient, offline-capable, accessibility-first AI collaboration tools.
+Everything that follows (the protocol CLI, the audit tools, the accessibility
+profiles) is written to generalize past the original single use case.
+
+`GROUNDING.md`, `AI_README.md`, `STACK.md`, `DRIFT_LOG.md`, and `Organize.md`
+hold a separate, more philosophical layer — conceptual notes and simulation
+sketches about grounding AI reasoning in physical/ecological reality. That
+material is aspirational worldbuilding, not wired into the working code in
+`apps/`. Treat it as context and inspiration, not as documentation of what's
+implemented today.
+
+---
+
 ## What This Is
 
-This repository is a **practical toolkit** for building AI systems that stay connected to reality—not just to training data, not just to narrative, but to the physical, ecological, and relational substrate that all life depends on.
-
-It started as a personal project, written for someone who thinks differently (and reads differently). It's grown into a modular system for:
+This repository is a **practical toolkit** for building AI systems that stay
+connected to reality — not just to training data, not just to narrative, but
+to the physical, ecological, and relational substrate that all life depends
+on. It's grown into a modular system for:
 
 - **Local, offline-first AI** that works without the cloud.
 - **Dyslexia-friendly interfaces** that prioritize clarity over density.
 - **Decision tracking and audit trails** that keep exchanges honest.
 - **Collaboration protocols** that treat disagreement as data, not failure.
-- **Grounding checks** that prevent AI from drifting into magic or noise.
 
 This is not a product. It's a **foundation**.
 
 ---
 
-## Why It Exists
+## Who This Is For
 
-Most AI systems are built on top of layers of language, culture, and noise—with no anchor to the physics, biology, or ecology they're supposed to help navigate. They become fluent in abstraction and brittle in reality.
-
-This repository is an attempt to build a different kind of AI: one that knows it's standing on dirt.
-
-It's built for:
-
-- **Solo developers** working offline in low-bandwidth environments.
-- **Collaborative teams** who need shared decision records.
-- **Communities** who want to shape their own AI tools without vendor lock-in.
-- **Anyone** who wants to build AI that is *resilient*—not just accurate.
+- Developers who want to build local-first, offline-capable AI.
+- Anyone doing accessibility work — dyslexia, low vision, ADHD-friendly formats.
+- Collaborative teams who need shared decision records.
+- Communities who want to shape their own AI tools without vendor lock-in.
 
 ---
-
-## What's Inside
-
-```
-
-Resilient-AI-Human-Collaboration/
-├── core/               # Core collaboration logic and session management
-├── protocols/          # Ethical and operational protocols for grounded interaction
-├── grounding/          # Substrate validation (physics, ecology, time)
-├── audit/              # Stateless checks for truth calibration
-├── interfaces/         # Dyslexia-friendly UI components and accessibility tools
-├── examples/           # Real-world use cases and sample sessions
-└── Organize.md         # Deep architecture notes (the "blueprint" behind it all)
-
-```
-
-Each module is designed to work offline, with minimal dependencies, and to be readable by humans first, machines second.
-
----
-
-## Quick Start
-
-### Installation
-
-```bash
-git clone https://github.com/JinnZ2/Resilient-AI-Human-Collaboration-.git
-cd Resilient-AI-Human-Collaboration-
-```
-
-(No external packages required. Everything runs on local Python or plain markdown.)
-
-Run a Grounded Session
-
-```python
-from core.session import GroundedSession
-session = GroundedSession()
-session.start()
-```
-
-The session will guide you through:
-
-· Intent clarification (what are you trying to do?)
-· Reality check (what's physically/ecologically possible?)
-· Decision audit (what assumptions are being made?)
-· Collaboration record (a permanent, verifiable log)
-
-See examples/ for more detailed walkthroughs.
-
----
-
-Who This Is For
-
-· Developers who want to build local-first, offline-capable AI.
-· Researchers exploring epistemic humility and substrate grounding.
-· Educators teaching AI literacy in accessible, human-centered ways.
-· Anyone who wants to collaborate with AI without losing their grip on reality.
-
----
-
-The Story Behind It
-
-This project was born on the road, built on a two-inch phone screen, and shaped by conversations in the woods. It began as a way to communicate complex ideas to someone who sees the world differently—and it grew into something larger.
-
-It's not perfect. It's not finished. But it's alive, and it's out there.
-
----
-
-Contributing
-
-You're welcome here.
-
-· Found a bug? Open an issue.
-· Have an idea? Start a discussion.
-· Want to help with accessibility? That's always welcome.
-· Just passing through? That's okay too.
-
-No contribution is too small. The goal is to make grounded AI collaboration available—not exclusive.
-
----
-
-License
-
-CCO 1.0 Universal — Public Domain.
-
-Use it. Change it. Share it. No strings attached.
-
----
-
-A Note from the Creator
-
-"A profession doesn't make a life. This is not a product. It's a foundation—built in the woods, shaped by the road, shared with anyone who needs it."
-
-
-
-# Resilient AI-Human Collaboration
-
-**Goal:** Practical, resilient tools that bridge complex communication — especially for dyslexia-friendly learning, local AI, and offline/low-bandwidth environments.
 
 ## What's Here
 
 | Path | Description |
 |------|-------------|
-| `apps/protocol/` | Collaboration protocol CLI — session state, decision IDs, checklists, risk tracking |
+| `apps/protocol/` | Collaboration protocol CLI — session state, decision IDs, checklists, risk tracking, audit, and grounding checks |
 | `apps/voice_assist/` | Transcribe videos to text, summarize, and format for accessibility |
 | `scripts/safe_ai_pipeline.sh` | Safe AI pipeline — verified transcription with provenance tracking |
 | `scripts/hf_get.sh` | Resilient Hugging Face model downloader (resume + token) |
@@ -205,6 +124,10 @@ python -m apps.protocol.cli checklist run bad-internet
 python -m apps.protocol.cli audit snr response.txt
 python -m apps.protocol.cli audit exchange human.txt ai.txt
 python -m apps.protocol.cli audit claim "X correlates with Y" --proxy "metric Z"
+
+# Check text against the L0-L5 substrate grounding layers (see "Grounding" below)
+python -m apps.protocol.cli ground layers
+python -m apps.protocol.cli ground check response.txt
 ```
 
 ### Available Checklists
@@ -246,6 +169,26 @@ The `apps/protocol/resilience/` modules are vendored from
 [JinnZ2/Resilience-indigenous-worldwide](https://github.com/JinnZ2/Resilience-indigenous-worldwide)
 (`resilience_stack/`, CC0 1.0).
 
+## Grounding (optional)
+
+Scan text for language that reads as a violation of one of the L0-L5 (+ Lε)
+substrate layers described in [STACK.md](STACK.md) — physics, thermodynamics,
+planetary limits, ecology, human biomechanics, epistemic/instrument
+uncertainty, and cultural constructs. This is a heuristic flagger built from
+regex markers, not a physics engine — a clean result means "no obvious red
+flags," not "verified true." It's an optional addition: nothing else in the
+codebase depends on it.
+
+```bash
+# List the layers and what each checks for
+python -m apps.protocol.cli ground layers
+
+# Scan a file or stdin for violations
+python -m apps.protocol.cli ground check response.txt
+echo "Faster than light travel." | python -m apps.protocol.cli ground check -
+python -m apps.protocol.cli ground check response.txt --fmt text
+```
+
 ## Voice Assist
 
 Transcribe audio/video and format text for accessibility.
@@ -263,6 +206,28 @@ python -m apps.voice_assist.cli format-text transcript.txt --width 60
 # Extract key sentences from a transcript (offline, no ML needed)
 python -m apps.voice_assist.cli summarize transcript.txt --sentences 5
 ```
+
+### Accessibility Profiles (optional)
+
+`format-text` and `summarize` accept an optional `--profile` preset tuned
+for different reading needs. An explicit `--width` or `--sentences` flag
+always overrides the profile default; omitting `--profile` entirely keeps
+the original defaults (width 60, 5 sentences) unchanged.
+
+```bash
+python -m apps.voice_assist.cli list-profiles
+
+python -m apps.voice_assist.cli format-text transcript.txt --profile dyslexia
+python -m apps.voice_assist.cli format-text transcript.txt --profile low-vision
+python -m apps.voice_assist.cli summarize transcript.txt --profile concise
+```
+
+| Profile | Width | Sentences | Purpose |
+|---------|-------|-----------|---------|
+| `dyslexia` | 50 | 5 | Short lines, generous paragraph breaks |
+| `low-vision` | 36 | 5 | Very short lines for large-font / zoomed displays |
+| `adhd` | 60 | 3 | Shorter summaries, moderate line width |
+| `concise` | 70 | 2 | Minimal summary for a quick skim |
 
 ## Safe AI Pipeline
 
@@ -318,7 +283,25 @@ python -m pytest tests/ --cov=apps --cov-report=term-missing
 - **Extractive summaries** — key points without needing ML models
 - Dictation + local models (future: Vosk / Whisper streaming)
 - Large text, high-contrast CLI output
+- Accessibility profiles for `format-text` / `summarize` (see above)
+
+## Contributing
+
+You're welcome here. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get
+started.
+
+- Found a bug? Open an issue.
+- Have an idea? Start a discussion.
+- Want to help with accessibility? That's always welcome.
+- Just passing through? That's okay too.
+
+No contribution is too small. The goal is to make grounded AI collaboration
+available — not exclusive.
 
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+---
+
+*"A profession doesn't make a life. This is not a product. It's a foundation—built in the woods, shaped by the road, shared with anyone who needs it."*

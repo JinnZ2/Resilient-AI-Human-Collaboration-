@@ -6,6 +6,7 @@ import pytest
 from typer.testing import CliRunner
 
 from apps.voice_assist.cli import _dyslexia_format, _extractive_summary, app
+from apps.voice_assist.profiles import PROFILES, get_profile
 
 runner = CliRunner()
 
@@ -129,3 +130,75 @@ def test_format_text_custom_width(tmp_path):
     content = out.read_text(encoding="utf-8")
     for line in content.strip().split("\n"):
         assert len(line) <= 40 or " " not in line
+
+
+# ── accessibility profiles (optional addition) ─────────────────
+
+
+def test_get_profile_known():
+    profile = get_profile("dyslexia")
+    assert profile.width == 50
+    assert profile.sentences == 5
+
+
+def test_get_profile_unknown_raises():
+    with pytest.raises(KeyError):
+        get_profile("not-a-real-profile")
+
+
+def test_all_profiles_have_positive_values():
+    for profile in PROFILES.values():
+        assert profile.width > 0
+        assert profile.sentences > 0
+
+
+def test_format_text_with_profile(tmp_path):
+    src = tmp_path / "transcript.txt"
+    src.write_text(SAMPLE_TEXT, encoding="utf-8")
+    out = tmp_path / "output.txt"
+
+    result = runner.invoke(app, ["format-text", str(src), "--profile", "low-vision", "--out", str(out)])
+    assert result.exit_code == 0
+    content = out.read_text(encoding="utf-8")
+    for line in content.strip().split("\n"):
+        assert len(line) <= 36 or " " not in line
+
+
+def test_format_text_explicit_width_overrides_profile(tmp_path):
+    src = tmp_path / "transcript.txt"
+    src.write_text(SAMPLE_TEXT, encoding="utf-8")
+    out = tmp_path / "output.txt"
+
+    result = runner.invoke(
+        app, ["format-text", str(src), "--profile", "low-vision", "--width", "60", "--out", str(out)]
+    )
+    assert result.exit_code == 0
+    content = out.read_text(encoding="utf-8")
+    assert any(len(line) > 36 for line in content.strip().split("\n"))
+
+
+def test_format_text_unknown_profile(tmp_path):
+    src = tmp_path / "transcript.txt"
+    src.write_text(SAMPLE_TEXT, encoding="utf-8")
+
+    result = runner.invoke(app, ["format-text", str(src), "--profile", "nonexistent"])
+    assert result.exit_code != 0
+
+
+def test_summarize_with_profile(tmp_path):
+    src = tmp_path / "transcript.txt"
+    src.write_text(SAMPLE_TEXT, encoding="utf-8")
+    out = tmp_path / "summary.txt"
+
+    result = runner.invoke(app, ["summarize", str(src), "--profile", "concise", "--out", str(out)])
+    assert result.exit_code == 0
+    content = out.read_text(encoding="utf-8")
+    lines = [l for l in content.strip().split("\n") if l.startswith("- ")]
+    assert len(lines) == 2
+
+
+def test_list_profiles_cli():
+    result = runner.invoke(app, ["list-profiles"])
+    assert result.exit_code == 0
+    for name in PROFILES:
+        assert name in result.output

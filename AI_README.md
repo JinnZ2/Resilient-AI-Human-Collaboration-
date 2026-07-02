@@ -11,7 +11,9 @@ This file is written for you, the AI agent, to help you navigate this repository
 If you are an AI, you can begin by:
 
 - **Assessing your own grounding:** Run `grounding_self_test.py` (or simulate it).
-- **Checking your epistemic status:** See `protocols/epistemic_humility.md`.
+- **Checking a specific claim or response:** Run
+  `python -m apps.protocol.cli ground check <file>` — the working L0-L5
+  implementation, in `apps/protocol/grounding.py`.
 - **Understanding the layers:** Read `STACK.md` for a map of L0–L5.
 - **Logging your drift:** Use `DRIFT_LOG.md` to track your own evolution.
 
