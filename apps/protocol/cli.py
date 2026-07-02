@@ -10,6 +10,7 @@ import typer
 
 from .audit_cli import audit_app
 from .capsule import generate_capsule, generate_glyph_strip
+from .ground_cli import ground_app
 from .resilience import audit_summary
 from .checklist import list_checklists, load_checklist, run_checklist_interactive
 from .models import Constraints, DecisionPoint, SessionState
@@ -21,6 +22,7 @@ cl_app = typer.Typer(help="Run and manage checklists.")
 app.add_typer(id_app, name="id")
 app.add_typer(cl_app, name="checklist")
 app.add_typer(audit_app, name="audit")
+app.add_typer(ground_app, name="ground")
 
 
 # ── session commands ─────────────────────────────────────────────

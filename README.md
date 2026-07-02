@@ -57,7 +57,7 @@ This is not a product. It's a **foundation**.
 
 | Path | Description |
 |------|-------------|
-| `apps/protocol/` | Collaboration protocol CLI — session state, decision IDs, checklists, risk tracking |
+| `apps/protocol/` | Collaboration protocol CLI — session state, decision IDs, checklists, risk tracking, audit, and grounding checks |
 | `apps/voice_assist/` | Transcribe videos to text, summarize, and format for accessibility |
 | `scripts/safe_ai_pipeline.sh` | Safe AI pipeline — verified transcription with provenance tracking |
 | `scripts/hf_get.sh` | Resilient Hugging Face model downloader (resume + token) |
@@ -124,6 +124,10 @@ python -m apps.protocol.cli checklist run bad-internet
 python -m apps.protocol.cli audit snr response.txt
 python -m apps.protocol.cli audit exchange human.txt ai.txt
 python -m apps.protocol.cli audit claim "X correlates with Y" --proxy "metric Z"
+
+# Check text against the L0-L5 substrate grounding layers (see "Grounding" below)
+python -m apps.protocol.cli ground layers
+python -m apps.protocol.cli ground check response.txt
 ```
 
 ### Available Checklists
@@ -164,6 +168,26 @@ include a short SHA-256 export hash for longitudinal tracking.
 The `apps/protocol/resilience/` modules are vendored from
 [JinnZ2/Resilience-indigenous-worldwide](https://github.com/JinnZ2/Resilience-indigenous-worldwide)
 (`resilience_stack/`, CC0 1.0).
+
+## Grounding (optional)
+
+Scan text for language that reads as a violation of one of the L0-L5 (+ Lε)
+substrate layers described in [STACK.md](STACK.md) — physics, thermodynamics,
+planetary limits, ecology, human biomechanics, epistemic/instrument
+uncertainty, and cultural constructs. This is a heuristic flagger built from
+regex markers, not a physics engine — a clean result means "no obvious red
+flags," not "verified true." It's an optional addition: nothing else in the
+codebase depends on it.
+
+```bash
+# List the layers and what each checks for
+python -m apps.protocol.cli ground layers
+
+# Scan a file or stdin for violations
+python -m apps.protocol.cli ground check response.txt
+echo "Faster than light travel." | python -m apps.protocol.cli ground check -
+python -m apps.protocol.cli ground check response.txt --fmt text
+```
 
 ## Voice Assist
 
