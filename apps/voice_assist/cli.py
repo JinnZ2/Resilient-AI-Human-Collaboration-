@@ -9,6 +9,8 @@ from pathlib import Path
 
 import typer
 
+from apps.voice_assist.profiles import PROFILES, get_profile
+
 app = typer.Typer(help="Transcribe audio/video and format text for accessibility.")
 
 
@@ -68,7 +70,10 @@ def grab_and_transcribe(url: str) -> None:
 @app.command()
 def format_text(
     src: str = typer.Argument(..., help="Path to a plain-text transcript file"),
-    width: int = typer.Option(60, help="Max characters per line (dyslexia-friendly default: 60)"),
+    width: int = typer.Option(None, help="Max characters per line (dyslexia-friendly default: 60)"),
+    profile: str = typer.Option(
+        "", "--profile", help=f"Accessibility profile ({', '.join(sorted(PROFILES))}); overrides default width"
+    ),
     out: str = typer.Option("", help="Output file path (default: <src>.formatted.txt)"),
 ) -> None:
     """Reformat a transcript for dyslexia-friendly reading.
@@ -82,6 +87,16 @@ def format_text(
         print(f"File not found: {src}", file=sys.stderr)
         raise SystemExit(1)
 
+    if width is None:
+        if profile:
+            try:
+                width = get_profile(profile).width
+            except KeyError as exc:
+                print(str(exc), file=sys.stderr)
+                raise SystemExit(1)
+        else:
+            width = 60
+
     raw = src_path.read_text(encoding="utf-8")
     formatted = _dyslexia_format(raw, width)
 
@@ -93,7 +108,10 @@ def format_text(
 @app.command()
 def summarize(
     src: str = typer.Argument(..., help="Path to a plain-text transcript file"),
-    sentences: int = typer.Option(5, help="Number of key sentences to extract"),
+    sentences: int = typer.Option(None, help="Number of key sentences to extract"),
+    profile: str = typer.Option(
+        "", "--profile", help=f"Accessibility profile ({', '.join(sorted(PROFILES))}); overrides default sentence count"
+    ),
     out: str = typer.Option("", help="Output file path (default: <src>.summary.txt)"),
 ) -> None:
     """Extract key sentences from a transcript (extractive summary).
@@ -106,12 +124,29 @@ def summarize(
         print(f"File not found: {src}", file=sys.stderr)
         raise SystemExit(1)
 
+    if sentences is None:
+        if profile:
+            try:
+                sentences = get_profile(profile).sentences
+            except KeyError as exc:
+                print(str(exc), file=sys.stderr)
+                raise SystemExit(1)
+        else:
+            sentences = 5
+
     raw = src_path.read_text(encoding="utf-8")
     summary = _extractive_summary(raw, sentences)
 
     out_path = Path(out) if out else src_path.with_suffix(".summary.txt")
     out_path.write_text(summary, encoding="utf-8")
     print(f"Summary -> {out_path}")
+
+
+@app.command("list-profiles")
+def list_profiles_cmd() -> None:
+    """List available accessibility profiles for format-text / summarize."""
+    for p in sorted(PROFILES.values(), key=lambda p: p.name):
+        print(f"{p.name:12} width={p.width:<4} sentences={p.sentences:<3} {p.description}")
 
 
 def _dyslexia_format(text: str, width: int = 60) -> str:
