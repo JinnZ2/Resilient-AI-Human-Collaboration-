@@ -79,3 +79,35 @@ python -m apps.protocol.cli export --fmt json
 - Handle missing dependencies gracefully with clear error messages.
 - Shell scripts should quote all variable expansions.
 - All new features should include tests.
+
+
+Review this repo against its CLAUDE.md and produce REVIEW.md.
+Focus on:
+
+1. **Structural consistency & conventions:**
+   - Do file names follow conventions? (docs: lowercase kebab-case; code: snake_case; shell scripts: .sh with set -euo pipefail and bash shebang)
+   - Are `data/` directories gitignored? Any large binaries accidentally committed?
+   - Are per‑app `requirements.txt` files present and up‑to‑date alongside `pyproject.toml`?
+   - Do Python modules use `typer` for CLIs and type hints where practical?
+   - Shell scripts: quoted variables, proper error handling.
+
+2. **README & discoverability:**
+   - Does the README clearly explain the project’s purpose (dyslexia-friendly, local AI, offline/low‑bandwidth)?
+   - Missing: CITATION.cff, KEYWORDS.txt, repository topics, license badge, "Why This Matters" statement. Provide ready‑to‑paste snippets.
+   - Is the one‑liner usage example clear? (e.g., transcribe, format‑text, protocol init)
+
+3. **Code audit highlights:**
+   - Are functions small and single‑purpose, with early returns?
+   - Missing dependency handling: graceful errors when optional tools not installed?
+   - Test coverage: do new features have tests? Are smoke tests present for both apps (voice_assist, protocol)?
+   - Any security concerns with environment variables or user input?
+
+4. **Organizational suggestions:**
+   - Any clutter in the root? (`env.example` is fine; any stray files?)
+   - Are `docs/` and `tests/` well‑structured?
+   - Should `apps/protocol` and `apps/voice_assist` be treated as separate installable packages, or is the current layout fine?
+
+5. **Repository topics suggestion:** 
+   Propose topics like: `accessibility`, `dyslexia-friendly`, `offline-first`, `local-ai`, `collaboration-protocol`, `whisper`, `low-bandwidth`, `resilience`.
+
+Keep sections concise. Output the full REVIEW.md.
