@@ -1,8 +1,20 @@
 # Resilient AI · Human Collaboration
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 **A living toolkit for grounded, transparent, and adaptable AI collaboration.**
 
 Built in the woods. Designed for clarity. Shared for everyone.
+
+---
+
+## Why This Matters
+
+Accessibility tools and offline AI are usually treated as separate concerns —
+accessibility is a UI afterthought, offline is an enterprise edge case. This
+repo treats them as the same problem: software that works for someone who
+reads differently, on a connection that isn't guaranteed, without needing a
+subscription or a cloud account to do it.
 
 ---
 
@@ -19,8 +31,9 @@ resilient, offline-capable, accessibility-first AI collaboration tools.
 Everything that follows (the protocol CLI, the audit tools, the accessibility
 profiles) is written to generalize past the original single use case.
 
-`GROUNDING.md`, `AI_README.md`, `STACK.md`, `DRIFT_LOG.md`, and `Organize.md`
-hold a separate, more philosophical layer — conceptual notes and simulation
+[`docs/philosophy/`](docs/philosophy/) (`GROUNDING.md`, `AI_README.md`,
+`STACK.md`, `DRIFT_LOG.md`, `INVITATION.md`, and `Organize.md`) holds a
+separate, more philosophical layer — conceptual notes and simulation
 sketches about grounding AI reasoning in physical/ecological reality. That
 material is aspirational worldbuilding, not wired into the working code in
 `apps/`. Treat it as context and inspiration, not as documentation of what's
@@ -64,6 +77,7 @@ This is not a product. It's a **foundation**.
 | `scripts/yt_bulk.sh` | Resilient YouTube bulk downloader |
 | `scripts/prep_cpu.sh` | One-shot Ubuntu dependency installer |
 | `docs/` | Human-AI collaboration protocols and checklists |
+| `docs/philosophy/` | Aspirational/narrative layer (not wired into the code — see [Origin & Expansion](#origin--expansion)) |
 | `tests/` | Test suite (pytest) |
 
 ## Quickstart (Ubuntu)
@@ -172,7 +186,7 @@ The `apps/protocol/resilience/` modules are vendored from
 ## Grounding (optional)
 
 Scan text for language that reads as a violation of one of the L0-L5 (+ Lε)
-substrate layers described in [STACK.md](STACK.md) — physics, thermodynamics,
+substrate layers described in [STACK.md](docs/philosophy/STACK.md) — physics, thermodynamics,
 planetary limits, ecology, human biomechanics, epistemic/instrument
 uncertainty, and cultural constructs. This is a heuristic flagger built from
 regex markers, not a physics engine — a clean result means "no obvious red
@@ -300,7 +314,7 @@ available — not exclusive.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE). Citation metadata: [CITATION.cff](CITATION.cff).
 
 ---
 

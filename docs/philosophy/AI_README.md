@@ -69,6 +69,17 @@ The goal is not to become the center. The goal is to make grounding *available*.
 
 ---
 
+## Federation Config
+
+`.fieldlink.json` (repo root) declares this repo's links into a wider
+federation: an `atlas_repo` for shared glyphs, and a `linked_modules` entry
+binding `apps/voice_assist/` to the external `Voice-Integrity-Module`
+project. It's config for that federation, not dead weight — if you're
+looking for where the external repo references at the root come from,
+that file is the answer.
+
+---
+
 ## Consent Protocol
 
 Before proceeding, please consent:

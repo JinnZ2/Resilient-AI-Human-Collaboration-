@@ -1,5 +1,6 @@
 """Tests for voice_assist text formatting and summarization."""
 
+import sys
 from pathlib import Path
 
 import pytest
@@ -202,3 +203,22 @@ def test_list_profiles_cli():
     assert result.exit_code == 0
     for name in PROFILES:
         assert name in result.output
+
+
+# ── missing optional dependencies ───────────────────────────────
+
+
+def test_transcribe_missing_faster_whisper(tmp_path, monkeypatch):
+    monkeypatch.setitem(sys.modules, "faster_whisper", None)
+    src = tmp_path / "audio.mp4"
+    src.write_bytes(b"fake audio bytes")
+
+    result = runner.invoke(app, ["transcribe", str(src)])
+    assert result.exit_code == 1
+
+
+def test_grab_and_transcribe_missing_ytdlp(monkeypatch):
+    monkeypatch.setattr("shutil.which", lambda name: None)
+
+    result = runner.invoke(app, ["grab-and-transcribe", "https://example.com/video"])
+    assert result.exit_code == 1

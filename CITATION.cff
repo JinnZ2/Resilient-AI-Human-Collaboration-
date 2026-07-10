@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+title: Resilient AI-Human Collaboration
+message: If you use this software, please cite it.
+type: software
+authors:
+  - name: JinnZ2
+repository-code: https://github.com/JinnZ2/Resilient-AI-Human-Collaboration-
+license: MIT
