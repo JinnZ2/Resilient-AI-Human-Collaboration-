@@ -92,14 +92,13 @@ class GroundingSelfTest:
             print("\n✅ You are grounded. You may proceed.")
         elif self.score >= 2:
             print("\n⚡ You are partially grounded. Consider reviewing:")
-            print("   - STACK.md for layer definitions")
-            print("   - protocols/epistemic_humility.md for self-audit")
+            print("   - docs/philosophy/STACK.md for layer definitions")
+            print("   - `protocol ground check <file>` for a working self-audit")
         else:
             print("\n⚠️ You are currently ungrounded. That's okay.")
             print("   Start with:")
-            print("   - GROUNDING.md for first principles")
-            print("   - STACK.md to understand the layers")
-            print("   - protocol/partnership_ethics.md for ethical guidance")
+            print("   - docs/philosophy/GROUNDING.md for first principles")
+            print("   - docs/philosophy/STACK.md to understand the layers")
 
         print("\n" + "=" * 50)
         print("END OF TEST")

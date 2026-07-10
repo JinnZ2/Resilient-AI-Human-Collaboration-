@@ -1,6 +1,6 @@
 """Substrate grounding checks — L0-L5 + Lε, as heuristic text scans.
 
-Implements the layer model from STACK.md as working, offline, stdlib-only
+Implements the layer model from docs/philosophy/STACK.md as working, offline, stdlib-only
 checks (same style as resilience/vendor/signal_to_noise.py): each layer is
 a list of regex markers for language that claims to violate that layer's
 constraints. This is a heuristic flagger, not a physics engine — it catches
