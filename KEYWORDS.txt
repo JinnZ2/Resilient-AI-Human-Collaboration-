@@ -1,0 +1,2 @@
+accessibility, dyslexia-friendly, offline-first, local-ai,
+collaboration-protocol, whisper, low-bandwidth, resilience

@@ -2,6 +2,7 @@
 
 import os
 import re
+import shutil
 import subprocess
 import sys
 import textwrap
@@ -47,6 +48,14 @@ def transcribe(src: str, out_dir: str = "data/videos/transcripts") -> None:
 @app.command()
 def grab_and_transcribe(url: str) -> None:
     """Download a single YouTube video, then transcribe it."""
+    if shutil.which("yt-dlp") is None:
+        print(
+            "Error: yt-dlp is not installed.\n"
+            "Run: pip install yt-dlp",
+            file=sys.stderr,
+        )
+        raise SystemExit(1)
+
     dest = Path("data/videos/_single")
     dest.mkdir(parents=True, exist_ok=True)
     cmd = [
