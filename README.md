@@ -1,6 +1,6 @@
 # Resilient AI · Human Collaboration
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: CC0-1.0](https://img.shields.io/badge/License-CC0_1.0-lightgrey.svg)](LICENSE)
 
 **A living toolkit for grounded, transparent, and adaptable AI collaboration.**
 
@@ -314,7 +314,7 @@ available — not exclusive.
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Citation metadata: [CITATION.cff](CITATION.cff).
+CC0-1.0 — see [LICENSE](LICENSE). Citation metadata: [CITATION.cff](CITATION.cff).
 
 ---
 
